@@ -36,7 +36,7 @@ const Hero = () => {
         </div>
       </div>
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 min-w-full mx-auto">
           {[
             {
               number: "1000+",
@@ -44,7 +44,13 @@ const Hero = () => {
             },
             {
               number: "99%",
-              text: "クライアント満足度",
+              text: (
+                <>
+                  クライアント
+                  <br />
+                  満足度
+                </>
+              ),
             },
             {
               number: "15年以上",
@@ -56,10 +62,10 @@ const Hero = () => {
             },
           ].map((item, index) => (
             <div key={index} className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl lg:text-5xl font-bold text-blue-600 mb-5">
                 {item.number}
               </div>
-              <div className="text-md lg:text-xl font-bold text-gray-800">
+              <div className="text-2xl lg:text-3xl font-bold text-gray-800">
                 {item.text}
               </div>
             </div>
