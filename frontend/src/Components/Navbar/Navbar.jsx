@@ -15,7 +15,7 @@ const MenuItem = ({ path, label, onClick }) => (
   <li>
     <Link
       to={path}
-      className="font-sans hover:text-blue-600 transition duration-300 font-bold text-xl"
+      className="font-sans hover:text-blue-600 transition duration-300 font-bold  text-lg xl:text-xl"
       onClick={onClick}
     >
       {label}
@@ -38,7 +38,7 @@ const Navbar = () => {
           <Link to="/">山田製作所</Link>
         </h1>
         <div className="hidden lg:flex flex-1 justify-center">
-          <ul className="flex gap-16 text-lg">
+          <ul className="flex gap-8 text-xs">
             {menuItems.map((item) => (
               <MenuItem key={item.path} {...item} />
             ))}
