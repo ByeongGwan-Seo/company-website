@@ -8,6 +8,7 @@ import Leadership from "./Pages/Leadership/Leadership";
 import Service from "./Pages/Service/Service";
 import Board from "./Pages/Board/Board";
 import Contact from "./Pages/Contact/Contact";
+import AdminLogin from "./Pages/Admin/AdminLogin";
 
 function Layout() {
   return (
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
         element: <Contact />,
       },
     ],
+  },
+  {
+    path: "/admin",
+    element: <AdminLogin />,
   },
 ]);
 
