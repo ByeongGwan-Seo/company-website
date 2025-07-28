@@ -27,17 +27,20 @@ const Contact = () => {
         "http://localhost:3000/api/contact",
         formData
       );
-      alert(
-        "お問い合わせありがとうございました。内容を確認の上、24時間以内にご連絡いたします。"
-      );
 
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        message: "",
-        status: "in_progress",
-      });
+      if (response.status === 201) {
+        alert(
+          "お問い合わせありがとうございました。内容を確認の上、24時間以内にご連絡いたします。"
+        );
+
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          message: "",
+          status: "in_progress",
+        });
+      }
     } catch (error) {
       const errorMessage = error.response.data.message || "failed to post";
       alert("エラーが発生しました。少々お待ちした上、再度お試しください。");
