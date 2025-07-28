@@ -38,7 +38,7 @@ const AdminNavbar = () => {
               to="/admin/posts"
               className="hover:bg-gray-700 px-3 py-2 rounded"
             >
-              掲示物
+              投稿管理
             </Link>
             <Link
               to="/admin/contacts"
