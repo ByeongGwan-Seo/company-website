@@ -27,7 +27,6 @@ const AdminLogin = () => {
         "http://localhost:3000/api/auth/login",
         formData,
         {
-          // can exchange cookies between front and back
           withCredentials: true,
         }
       );
