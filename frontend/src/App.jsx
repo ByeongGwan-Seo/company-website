@@ -1,4 +1,5 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 import Footer from "./Components/Footer/Footer";
 import Navbar from "./Components/Navbar/Navbar";
 import {
@@ -15,8 +16,11 @@ import Board from "./Pages/Board/Board";
 import Contact from "./Pages/Contact/Contact";
 import AdminLogin from "./Pages/Admin/AdminLogin";
 import AdminPosts from "./Pages/Admin/AdminPosts";
-import { useEffect, useState } from "react";
 import axios from "axios";
+import AdminCreatePost from "./Pages/Admin/AdminCreatePost";
+import AdminEditPost from "./Pages/Admin/AdminEditPost";
+import AdminContacts from "./Pages/Admin/AdminContacts";
+import AdminNavBar from "./Components/AdminNavBar/AdminNavBar";
 
 function AuthRedirectRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -57,6 +61,15 @@ function Layout() {
   );
 }
 
+function AdminLayout() {
+  return (
+    <>
+      <AdminNavBar />
+      <Outlet />
+    </>
+  );
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -92,6 +105,28 @@ const router = createBrowserRouter([
     path: "/admin",
     element: <AuthRedirectRoute />,
     children: [{ index: true, element: <AdminLogin /> }],
+  },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "posts",
+        element: <AdminPosts />,
+      },
+      {
+        path: "create-post",
+        element: <AdminCreatePost />,
+      },
+      {
+        path: "edit-post:/id",
+        element: <AdminEditPost />,
+      },
+      {
+        path: "contacts",
+        element: <AdminContacts />,
+      },
+    ],
   },
 ]);
 
