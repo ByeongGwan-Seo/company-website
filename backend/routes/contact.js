@@ -60,4 +60,37 @@ router.get("/:id", authenticationToken, async (req, res) => {
   }
 });
 
+router.put("/:id", authenticationToken, async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const contact = await Contact.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!contact) {
+      return res.status(404).json({ message: "お問い合わせを見つけません" });
+    }
+
+    res.status(201).json({ message: "対応状態を変更しました", contact });
+  } catch (err) {
+    res.status(500).json({ message: "サーバーエラー" });
+  }
+});
+
+router.delete("/:id", authenticationToken, async (req, res) => {
+  try {
+    const contact = await Contact.findByIdAndDelete(req.params.id);
+
+    if (!contact) {
+      return res.status(404).json({ message: "お問い合わせを見つけません" });
+    }
+
+    res.status(201).json({ message: "お問い合わせを削除しました" });
+  } catch (error) {
+    res.status(500).json({ message: "サーバーエラー" });
+  }
+});
 module.exports = router;
