@@ -8,6 +8,7 @@ const app = express();
 const PORT = 3000;
 
 const userRoutes = require("./routes/user");
+const contactRoutes = require("./routes/contact");
 
 app.use(express.json());
 app.use(express.urlencoded());
@@ -20,6 +21,7 @@ app.use(
 );
 
 app.use("/api/auth", userRoutes);
+app.use("/api/contact", contactRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
