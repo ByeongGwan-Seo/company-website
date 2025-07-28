@@ -49,7 +49,10 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ username }).select("+password");
 
     if (!user) {
-      res.status(401).json({ message: "invalid user" });
+      res.status(401).json({
+        message: "登録されてないIDです",
+        remainingAttempts: 5 - user.failedLoginAttempts,
+      });
     }
 
     if (!user.isActive) {
@@ -57,7 +60,10 @@ router.post("/login", async (req, res) => {
     }
 
     if (user.isLoggedIn) {
-      res.status(401).json({ message: "logged in already" });
+      res.status(401).json({
+        message: "logged in already",
+        remainingAttempts: 5 - user.failedLoginAttempts,
+      });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
@@ -169,6 +175,26 @@ router.delete("/delete/:userId", async (req, res) => {
     res.json({ message: "user deleted!" });
   } catch (error) {
     res.status(500).json({ message: "user deleted" });
+  }
+});
+
+router.post("/verify-token", (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(400).json({
+      isValid: false,
+      message: "トークンがありません",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.status(200).json({ isValid: true, user: decoded });
+  } catch (error) {
+    return res
+      .status(401)
+      .json({ isValid: false, message: "有効なトークンではありません" });
   }
 });
 module.exports = router;
