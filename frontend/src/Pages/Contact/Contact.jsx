@@ -1,6 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+    status: "in_progress",
+  });
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+
+    console.log(formData);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/contact",
+        formData
+      );
+      alert(
+        "お問い合わせありがとうございました。内容を確認の上、24時間以内にご連絡いたします。"
+      );
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+        status: "in_progress",
+      });
+    } catch (error) {
+      const errorMessage = error.response.data.message || "failed to post";
+      alert("エラーが発生しました。少々お待ちした上、再度お試しください。");
+
+      console.log(errorMessage);
+      setError({
+        message: errorMessage,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-32">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -17,48 +65,79 @@ const Contact = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           <div>
-            <form className="bg-white rounded-2xl shadow-xl p-8">
+            <form
+              className="bg-white rounded-2xl shadow-xl p-8"
+              onSubmit={handleSubmit}
+            >
               <div className="space-y-6">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label
+                    htmlFor="name"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
                     名前
                   </label>
                   <input
+                    id="name"
+                    name="name"
                     type="text"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                     placeholder="山田太郎"
+                    onChange={handleChange}
+                    value={formData.name}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label
+                    htmlFor="mail"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
                     メール
                   </label>
                   <input
+                    id="email"
+                    name="email"
                     type="email"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                     placeholder="example@email.com"
+                    onChange={handleChange}
+                    value={formData.email}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label
+                    htmlFor="phone"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
                     電話番号
                   </label>
                   <input
+                    id="phone"
+                    name="phone"
                     type="tel"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
                     placeholder="010-1234-5678"
+                    onChange={handleChange}
+                    value={formData.phone}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label
+                    htmlFor="message"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
                     内容
                   </label>
                   <textarea
+                    id="message"
+                    name="message"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors h-40"
                     placeholder="お問い合わせ内容"
+                    onChange={handleChange}
+                    value={formData.message}
                     required
                   ></textarea>
                 </div>
