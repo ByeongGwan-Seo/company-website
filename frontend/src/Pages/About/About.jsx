@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import CompanyImage from "../../assets/Image2.webp";
 
 const mockYearData = [
@@ -19,6 +20,9 @@ const mockValues = [
 ];
 
 const About = () => {
+  useEffect(() => {
+    document.title = "山田製作所 | 企業情報";
+  }, []);
   return (
     <div className="container mx-auto px-4 py-32 max-w-7xl">
       <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-24">
