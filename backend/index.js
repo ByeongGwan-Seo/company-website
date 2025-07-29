@@ -9,7 +9,7 @@ const PORT = 3000;
 
 const userRoutes = require("./routes/user");
 const contactRoutes = require("./routes/contact");
-
+const postRoutes = require("./routes/post");
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());
@@ -22,6 +22,7 @@ app.use(
 
 app.use("/api/auth", userRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/post", postRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
