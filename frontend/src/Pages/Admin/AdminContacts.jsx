@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const AdminContacts = () => {
   const [contacts, setContacts] = useState([]);
@@ -49,28 +50,41 @@ const AdminContacts = () => {
       );
 
       setIsModalOpen(false);
-      alert("対応状況を修正しました");
+      Swal.fire("修正完了", "対応状況を修正しました", "success");
     } catch (error) {
       console.log("エラー：", error);
+      Swal.fire("修正 エラー", "修正中エラーが発生しました", "error");
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await axios.delete(
-        `http://localhost:3000/api/contact/${selectedContact._id}`,
-        {
-          withCredentials: true,
-        }
-      );
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "削除しますか？",
+      text: "削除したお問い合わせは復旧できません",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "削除",
+      cancelButtonText: "キャンセル",
+    });
 
-      setContacts(
-        contacts.map((contact) => {
-          contact._id === selectedContact._id ? { ...contact } : contact;
-        })
-      );
-    } catch (error) {
-      console.log("エラー", error);
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:3000/api/contact/${id}`, {
+          withCredentials: true,
+        });
+
+        setContacts(
+          contacts.filter((contact) => {
+            contact._id !== id;
+          })
+        );
+        Swal.fire("削除完了", "削除しました", "success");
+      } catch (error) {
+        console.log("エラー", error);
+        Swal.fire("削除エラー", "削除中エラーが発生しました", "error");
+      }
     }
   };
 
@@ -217,7 +231,7 @@ const AdminContacts = () => {
                           修正
                         </button>
                         <button
-                          onClick={() => handleDelete(contact.id)}
+                          onClick={() => handleDelete(contact._id)}
                           className="px-3 py-1.5 bg-red-500 text-white rounded whitespace-nowrap  hover:bg-red-600"
                         >
                           削除
@@ -271,7 +285,7 @@ const AdminContacts = () => {
                     修正
                   </button>
                   <button
-                    onClick={() => handleDelete(contact)}
+                    onClick={() => handleDelete(contact._id)}
                     className="px-3 py-1.5 bg-red-500 text-white rounded whitespace-nowrap hover:bg-red-600"
                   >
                     削除
