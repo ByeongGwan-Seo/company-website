@@ -9,8 +9,8 @@ describe("Post API Tests", () => {
       method: "POST",
       url: loginUrl,
       body: {
-        username: "admin",
-        password: "admin123!",
+        username: process.env.ADMIN_ID,
+        password: process.env.ADMIN_PW,
       },
     }).then((res) => {
       const cookies = res.headers["set-cookie"];
