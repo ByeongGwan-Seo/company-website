@@ -67,9 +67,12 @@ const AdminPosts = () => {
         </div>
 
         <div className="flex items-center space-x-2">
-          <button className="border rounded px-5 py-2 font-semibold bg-blue-400 hover:bg-blue-600 transition-colors duration-300">
+          <a
+            href="/admin/create-post"
+            className="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-center"
+          >
             投稿
-          </button>
+          </a>
         </div>
       </div>
 
@@ -121,17 +124,19 @@ const AdminPosts = () => {
             ) : (
               paginatedPosts.map((post, index) => (
                 <tr key={post._id} className="border-b">
-                  <td className="text-center px-4 py-3 max-w-[8%]">
+                  <td className="text-center text-md px-4 py-3 max-w-[8%]">
                     {(currentPage - 1) * pageSize + index + 1}
                   </td>
-                  <td className="text-center px-4 py-3 max-w-[15%] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                  <td className="text-center text-md px-4 py-3 max-w-[15%] overflow-hidden overflow-ellipsis whitespace-nowrap">
                     {post.title}
                   </td>
-                  <td className="text-center px-4 py-3 max-w-[20%] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                  <td className="text-left text-md px-4 py-3 max-w-[20%] overflow-hidden overflow-ellipsis whitespace-nowrap">
                     {post.content}
                   </td>
-                  <td className="text-center px-4 py-3">{post.views}</td>
-                  <td className="text-center px-4 py-3">
+                  <td className="text-center text-md px-4 py-3">
+                    {post.views}
+                  </td>
+                  <td className="text-center text-md px-4 py-3">
                     {Array.isArray(post.fileUrl) ? (
                       <div className="flex flex-col gap-1">
                         {post.fileUrl.map((url, index) => (
@@ -183,13 +188,13 @@ const AdminPosts = () => {
                       )
                     )}
                   </td>
-                  <td className=" px-4 py-3">
+                  <td className=" px-4 py-3 text-sm text-center">
                     {new Date(post.createdAt).toLocaleString()}
                   </td>
-                  <td className=" px-4 py-3">
+                  <td className=" px-4 py-3 text-sm text-center">
                     {new Date(post.updatedAt).toLocaleString()}
                   </td>
-                  <td className="text-center px-4 py-3 min-w-[12%]">
+                  <td className="text-center text-md px-4 py-3 min-w-[12%]">
                     <div className="flex justify-center space-x-2">
                       <button className="px-3 py-1.5 bg-blue-500 text-white whitespace-nowrap rounded hover:bg-blue-600">
                         修正
@@ -310,17 +315,17 @@ const AdminPosts = () => {
         <button
           className="px-3 py-1 rounded border disabled:opacity-50"
           onClick={() => setCurrentPage((p) => p - 1)}
-          disabled={currentPage === 1}
+          disabled={currentPage === 1 || totalPages === 0}
         >
           前へ
         </button>
         <span className="px-3 py-1">
-          {currentPage} / {totalPages}
+          {totalPages > 0 ? `${currentPage} / ${totalPages}` : "0 / 0"}
         </span>
         <button
           className="px-3 py-1 rounded border disabled:opacity-50"
           onClick={() => setCurrentPage((p) => p + 1)}
-          disabled={currentPage === totalPages}
+          disabled={currentPage >= totalPages || totalPages === 0}
         >
           次へ
         </button>
