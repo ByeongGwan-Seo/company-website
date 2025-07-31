@@ -30,7 +30,7 @@ const authenticationToken = (req, res, next) => {
   }
 };
 
-router.post("/", authenticationToken, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { title, content, fileUrl } = req.body;
 
