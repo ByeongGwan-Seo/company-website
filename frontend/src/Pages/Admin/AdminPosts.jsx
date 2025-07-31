@@ -1,50 +1,67 @@
-import React from "react";
-
-const dummyPosts = [
-  {
-    _id: "1",
-    title: "第一の投稿",
-    content: "これは第一の投稿の内容です。",
-    views: 123,
-    fileUrl: ["https://example.com/file1.pdf"],
-    createdAt: "2023-12-01T12:00:00Z",
-    updatedAt: "2023-12-02T15:30:00Z",
-  },
-  {
-    _id: "2",
-    title: "第二の投稿",
-    content: "こちらは第二の投稿の内容です。",
-    views: 456,
-    fileUrl: ["https://example.com/file2.pdf", "https://example.com/file3.pdf"],
-    createdAt: "2023-12-03T10:00:00Z",
-    updatedAt: "2023-12-03T18:45:00Z",
-  },
-  {
-    _id: "3",
-    title: "第三の投稿",
-    content: "第三の投稿の内容になります。",
-    views: 789,
-    fileUrl: [],
-    createdAt: "2023-12-05T09:00:00Z",
-    updatedAt: "2023-12-05T14:30:00Z",
-  },
-];
+import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
 
 const AdminPosts = () => {
+  const [posts, setPosts] = useState([]);
+  const [pageSize, setPageSize] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState("title");
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/post", {
+          withCredentials: true,
+        });
+
+        setPosts(response.data);
+      } catch (error) {}
+    };
+
+    fetchPosts();
+  }, []);
+
+  const getFileNameFromUrl = (url) => {
+    if (!url) return "";
+    if (typeof url !== "string") return "";
+    const parts = url.split("/");
+    return parts[parts.length - 1];
+  };
+
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      const value = post[searchType].toLowerCase() || "";
+      return value.includes(searchTerm.toLowerCase());
+    });
+  }, [posts, searchTerm, searchType]);
+
+  const totalPages = Math.ceil(filteredPosts.length / pageSize);
+  const paginatedPosts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredPosts.slice(start, start + pageSize);
+  }, [filteredPosts, currentPage, pageSize]);
+
   return (
-    <div className="p-4 mx-auto max-w-[1400px]">
+    <div className="p-4 mx-auto max-w-[1800px]">
       <h1 className="text-4xl font-bold mt-6 mb-8">投稿管理</h1>
-      <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex w-full md:w-auto gap-2">
-          <select className="border rounded px-3 py-2 font-bold">
-            <option value="name">タイトル</option>
+          <select
+            className="border rounded px-3 py-2 text-base"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="title">タイトル</option>
             <option value="content">内容</option>
           </select>
-          <div className="flex-1 md:w-80 ">
+          <div className="flex-1 md:w-80">
             <input
               type="text"
               placeholder="検索"
-              className="w-full border rounded px-3 py-2 font-bold"
+              className="w-full border rounded px-3 py-2 text-base"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -56,121 +73,255 @@ const AdminPosts = () => {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4 flex justify-between items-center">
         <div className="text-lg font-bold text-gray-600">
-          {`${dummyPosts.length}件の投稿があります`}
+          {paginatedPosts.length} 件の投稿があります
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <label className="text-base font-bold text-gray-600">
+            表示件数:{" "}
+          </label>
+          <select
+            className="border rounded px-3 py-2"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            {[1, 2, 3, 4].map((size) => (
+              <option key={size} value={size}>{`${size}件`}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded-lg overflow-hidden text-sm lg:text-lg font-bold">
+        <table className="w-full bg-white shadow-md rounded-lg table-fixed overflow-hidden text-sm lg:text-lg font-bold">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-3 text-left">番号</th>
-              <th className="px-4 py-3 text-left">タイトル</th>
-              <th className="px-4 py-3 text-left">内容</th>
-              <th className="px-4 py-3 text-left">閲覧数</th>
-              <th className="px-4 py-3 text-center">ファイル</th>
-              <th className="px-4 py-3 text-left">投稿日</th>
-              <th className="px-4 py-3 text-left">修正日</th>
-              <th className="px-4 py-3 text-center">管理</th>
+              <th className="px-4 py-3 text-center w-[5%]">番号</th>
+              <th className="px-4 py-3 text-center w-[15%]">タイトル</th>
+              <th className="px-4 py-3 text-center w-[20%]">内容</th>
+              <th className="px-4 py-3 text-center w-[7%]">閲覧数</th>
+              <th className="px-4 py-3 text-center w-[10%]">ファイル</th>
+              <th className="px-4 py-3 text-center w-[12%]">投稿日</th>
+              <th className="px-4 py-3 text-center w-[12%]">修正日</th>
+              <th className="px-4 py-3 text-center w-[12%]">管理</th>
             </tr>
           </thead>
           <tbody>
-            {dummyPosts.map((post, index) => (
-              <tr key={post._id} className="border-b">
-                <td className="px-4 py-3">{index + 1}</td>
-                <td className="px-4 py-3 overflow-hidden overflow-ellipsis whitespace-nowrap">
-                  {post.title}
-                </td>
-                <td className="px-4 py-3 overflow-hidden overflow-ellipsis whitespace-nowrap">
-                  {post.content}
-                </td>
-                <td className="px-4 py-3">{post.views}</td>
-                <td className="px-4 py-3 text-center">
-                  {post.fileUrl.length > 0 ? (
-                    post.fileUrl.map((url, index) => (
-                      <button
-                        key={index}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm rounded-md transition-all duration-300 border border-gray-200 hover:border-gray-300 mr-2"
-                      >
-                        ファイル {index + 1}
-                      </button>
-                    ))
-                  ) : (
-                    <span className="text-gray-500">無し</span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  {new Date(post.createdAt).toLocaleString()}
-                </td>
-                <td className="px-4 py-3">
-                  {new Date(post.updatedAt).toLocaleString()}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end space-x-2">
-                    <button className="px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
-                      修正
-                    </button>
-                    <button className="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600">
-                      削除
-                    </button>
-                  </div>
+            {paginatedPosts.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="px-4 py-8 text-center text-gray-500">
+                  掲示内容がありません
                 </td>
               </tr>
-            ))}
+            ) : (
+              paginatedPosts.map((post, index) => (
+                <tr key={post._id} className="border-b">
+                  <td className="text-center px-4 py-3 max-w-[8%]">
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </td>
+                  <td className="text-center px-4 py-3 max-w-[15%] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    {post.title}
+                  </td>
+                  <td className="text-center px-4 py-3 max-w-[20%] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    {post.content}
+                  </td>
+                  <td className="text-center px-4 py-3">{post.views}</td>
+                  <td className="text-center px-4 py-3">
+                    {Array.isArray(post.fileUrl) ? (
+                      <div className="flex flex-col gap-1">
+                        {post.fileUrl.map((url, index) => (
+                          <button
+                            key={index}
+                            onClick={() => window.open(url, "_blank")}
+                            className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 text-sm rounded-lg transition-all duration-200 border border-gray-300 shadow-sm hover:shadow w-full mb-1 last:mb-0"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-2 text-blue-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                            <span className="truncate">
+                              {getFileNameFromUrl(url)}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      post.fileUrl && (
+                        <button
+                          onClick={() => window.open(post.fileUrl, "_blank")}
+                          className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-md transition-colors duration-200 border border-gray-300"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          {getFileNameFromUrl(post.fileUrl)}
+                        </button>
+                      )
+                    )}
+                  </td>
+                  <td className=" px-4 py-3">
+                    {new Date(post.createdAt).toLocaleString()}
+                  </td>
+                  <td className=" px-4 py-3">
+                    {new Date(post.updatedAt).toLocaleString()}
+                  </td>
+                  <td className="text-center px-4 py-3 min-w-[12%]">
+                    <div className="flex justify-center space-x-2">
+                      <button className="px-3 py-1.5 bg-blue-500 text-white whitespace-nowrap rounded hover:bg-blue-600">
+                        修正
+                      </button>
+                      <button className="px-3 py-1.5 bg-red-500 text-white whitespace-nowrap rounded hover:bg-red-600">
+                        削除
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:hidden">
-        {dummyPosts.map((post, index) => (
-          <div
-            key={post._id}
-            className="p-4 border rounded-lg bg-white shadow-md"
-          >
-            <div className="flex justify-between items-cecnter mb-2">
-              <h2 className="text-lg font-bold">{post.title}</h2>
-              <span className="text-gray-500 text-sm">#{index + 1}</span>
-            </div>
-            <p className="text-gray-600 mb-4">{post.content}</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.fileUrl.length > 0 ? (
-                post.fileUrl.map((url, index) => (
-                  <button
-                    key={index}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm rounded-md transition-all duration-300 border border-gray-200 hover:border-gray-300 mr-2"
-                  >
-                    ファイル {index + 1}
-                  </button>
-                ))
-              ) : (
-                <span className="text-gray-500">ファイル無し</span>
-              )}
-            </div>
-            <div className="text-sm text-gray-500">
-              <div>閲覧数: {post.views}</div>
-              <div>投稿日: {new Date(post.createdAt).toLocaleString()}</div>
-              <div>修正日: {new Date(post.updatedAt).toLocaleString()}</div>
-            </div>
-            <div className="flex justify-end space-x-2 mt-4">
-              <button className="px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
-                修正
-              </button>
-              <button className="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600">
-                削除
-              </button>
-            </div>
+      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+        {paginatedPosts.length === 0 ? (
+          <div className="col-span-full p-8 text-center text-gray-500 bg-white rounded-lg shadow">
+            表示内容がありません
           </div>
-        ))}
+        ) : (
+          paginatedPosts.map((post, index) => (
+            <div
+              key={post._id}
+              className="block md:hidden bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-sm 2xl:text-base text-gray-500">
+                  #{(currentPage - 1) * pageSize + index + 1}
+                </span>
+                <div className="flex gap-2">
+                  <a
+                    // href={`/admin/edit-post/${post._id}`}
+                    className="text-sm 2xl:text-base text-blue-600 hover:text-blue-800"
+                  >
+                    修正
+                  </a>
+                  <button
+                    // onClick={() => handleDelete(post._id)}
+                    className="text-sm 2xl:text-base text-red-600 hover:text-red-800"
+                  >
+                    削除
+                  </button>
+                </div>
+              </div>
+
+              <h3 className="text-xl 2xl:text-2xl font-bold mb-2 overflow-hidden overflow-ellipsis whitespace-nowrap">
+                {post.title}
+              </h3>
+
+              <p className="text-gray-600 2xl:text-lg mb-3 overflow-hidden overflow-ellipsis whitespace-nowrap">
+                {post.content}
+              </p>
+
+              <div className="flex justify-between items-center text-sm 2xl:text-base text-gray-500 mb-2">
+                <span>閲覧数: {post.views}</span>
+                <div className="flex flex-col gap-2">
+                  {Array.isArray(post.fileUrl)
+                    ? post.fileUrl.map((url, index) => (
+                        <button
+                          key={index}
+                          onClick={() => window.open(url, "_blank")}
+                          className="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-sm rounded-lg transition-all duration-200 border border-gray-300 shadow-sm hover:shadow-md w-full mb-1.5 last:mb-0 group"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-2 text-blue-500 group-hover:text-blue-600 transition-colors"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          <span className="truncate">
+                            {getFileNameFromUrl(url)}
+                          </span>
+                        </button>
+                      ))
+                    : post.fileUrl && (
+                        <button
+                          onClick={() => window.open(post.fileUrl, "_blank")}
+                          className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-md transition-colors duration-200 border border-gray-300 w-full"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          {getFileNameFromUrl(post.fileUrl)}
+                        </button>
+                      )}
+                </div>
+              </div>
+
+              <div className="flex justify-between text-sm 2xl:text-base text-gray-500">
+                <span>作成: {new Date(post.createdAt).toLocaleString()}</span>
+                <span>修正: {new Date(post.updatedAt).toLocaleString()}</span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="mt-4 flex justify-center space-x-2 text-lg font-bold">
-        <button className="px-3 py-1 rounded border disabled:opacity-50">
+        <button
+          className="px-3 py-1 rounded border disabled:opacity-50"
+          onClick={() => setCurrentPage((p) => p - 1)}
+          disabled={currentPage === 1}
+        >
           前へ
         </button>
-        <span className="px-3 py-1">1 / 1</span>
-        <button className="px-3 py-1 rounded border disabled:opacity-50">
+        <span className="px-3 py-1">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          className="px-3 py-1 rounded border disabled:opacity-50"
+          onClick={() => setCurrentPage((p) => p + 1)}
+          disabled={currentPage === totalPages}
+        >
           次へ
         </button>
       </div>
