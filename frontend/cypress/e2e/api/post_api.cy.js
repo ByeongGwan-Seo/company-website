@@ -9,14 +9,13 @@ describe("Post API Tests", () => {
       method: "POST",
       url: loginUrl,
       body: {
-        username: process.env.ADMIN_ID,
-        password: process.env.ADMIN_PW,
+        username: Cypress.env("ADMIN_ID"),
+        password: Cypress.env("ADMIN_PW"),
       },
     }).then((res) => {
       const cookies = res.headers["set-cookie"];
       const tokenHeader = cookies.find((c) => c.startsWith("token="));
       expect(tokenHeader).to.exist;
-
       tokenCookie = tokenHeader.split(";")[0];
     });
   });
@@ -31,42 +30,31 @@ describe("Post API Tests", () => {
       body: {
         title: "Test Post",
         content: "This is a test post",
-        fileUrl: "http://example.com/file.png",
+        fileUrl: ["https://example.com/file.png"],
       },
-    }).then((response) => {
-      expect(response.status).to.eq(201);
-      expect(response.body).to.have.property("title", "Test Post");
-      createdPostId = response.body._id || response.body.id;
+    }).then((res) => {
+      expect(res.status).to.eq(201);
+      expect(res.body).to.have.property("title", "Test Post");
+      createdPostId = res.body._id;
     });
   });
 
   it("should fetch all posts", () => {
-    cy.request({
-      method: "GET",
-      url: baseUrl,
-      headers: {
-        Cookie: tokenCookie,
-      },
-    }).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body).to.be.an("array");
+    cy.request("GET", baseUrl).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body).to.be.an("array");
     });
   });
 
-  it("should fetch a post by ID", () => {
-    cy.request({
-      method: "GET",
-      url: `${baseUrl}/${createdPostId}`,
-      headers: {
-        Cookie: tokenCookie,
-      },
-    }).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body).to.have.property("title");
+  it("should fetch a post by ID with renderedContent", () => {
+    cy.request("GET", `${baseUrl}/${createdPostId}`).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body).to.have.property("title");
+      expect(res.body).to.have.property("renderedContent");
     });
   });
 
-  it("should update the post", () => {
+  it("should update the post and expect message", () => {
     cy.request({
       method: "PUT",
       url: `${baseUrl}/${createdPostId}`,
@@ -75,25 +63,26 @@ describe("Post API Tests", () => {
       },
       body: {
         title: "Updated Title",
-        content: "Updated Content",
-        fileUrl: "http://example.com/updated.png",
+        content: "Updated Content ![](https://example.com/old.png)",
+        fileUrl: ["https://example.com/updated.png"],
       },
-    }).then((response) => {
-      expect(response.status).to.eq(201);
-      expect(response.body.message).to.eq("修正しました");
+    }).then((res) => {
+      expect(res.status).to.eq(201);
+      expect(res.body.message).to.eq("修正しました");
+      expect(res.body.post.title).to.eq("Updated Title");
     });
   });
 
-  it("should delete the post", () => {
+  it("should delete the post and remove files", () => {
     cy.request({
       method: "DELETE",
       url: `${baseUrl}/${createdPostId}`,
       headers: {
         Cookie: tokenCookie,
       },
-    }).then((response) => {
-      expect(response.status).to.eq(201);
-      expect(response.body.message).to.eq("掲示物を削除しました");
+    }).then((res) => {
+      expect(res.status).to.eq(200);
+      expect(res.body.message).to.eq("投稿した掲示物とファイルを削除しました");
     });
   });
 });
