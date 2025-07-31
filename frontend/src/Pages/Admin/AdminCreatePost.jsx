@@ -2,6 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import AdminPostEditor from "../../Components/AdminPost/AdminPostEditor";
 
 const AdminCreatePost = () => {
   const navigate = useNavigate();
@@ -39,11 +40,41 @@ const AdminCreatePost = () => {
       </div>
     );
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold sm:mb-8 text-gray-800">
           新しい投稿
         </h2>
+
+        <form className="space-y-4 sm:space-y-8">
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-lg sm:text-xl font-medium text-gray-700 mb-2"
+            >
+              タイトル
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 text-base sm:text-lg p-2 sm:p-3"
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="content"
+              className="block text-lg sm:text-xl font-medium text-gray-700 mb-2"
+            >
+              内容
+            </label>
+            <AdminPostEditor />
+          </div>
+        </form>
       </div>
     </div>
   );
