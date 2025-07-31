@@ -151,8 +151,8 @@ router.put("/:id", authenticationToken, async (req, res) => {
       }
     };
 
-    const allDeletedFiles = [...deletedImages, ...deletedFiles];
-    for (const fileUrl of allDeletedFiles) {
+    const allFiles = [...deletedImages, ...(post.fileUrl || [])];
+    for (const fileUrl of allFiles) {
       const key = getS3KeyFromUrl(fileUrl);
       if (key) {
         try {
@@ -194,6 +194,34 @@ router.delete("/:id", authenticationToken, async (req, res) => {
     const imgRegex =
       /https:\/\/[^"']*?\.(?:png|jpg|jpeg|gif|PNG|JPG|JPEG|GIF)/g;
     const contentImages = post.content.match(imgRegex) || [];
+
+    const getS3KeyFromUrl = (url) => {
+      try {
+        const urlObj = new URL(url);
+        return decodeURIComponent(urlObj.pathname.substring(1));
+      } catch (error) {
+        console.log("url パーシングエラー", error);
+        return null;
+      }
+    };
+
+    const allDeletedFiles = [...deletedImages, ...deletedFiles];
+    for (const fileUrl of allDeletedFiles) {
+      const key = getS3KeyFromUrl(fileUrl);
+      if (key) {
+        try {
+          await s3Client.send(
+            new DeleteObjectCommand({
+              Bucket: process.env.AWS_BUCKET_NAME,
+              Key: key,
+            })
+          );
+          console.log("ファイル削除完了：", key);
+        } catch (error) {
+          console.log("ファイル削除エラー：", error);
+        }
+      }
+    }
 
     res.status(201).json({ message: "掲示物を削除しました" });
   } catch (error) {
