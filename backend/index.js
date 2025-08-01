@@ -11,16 +11,16 @@ const userRoutes = require("./routes/user");
 const contactRoutes = require("./routes/contact");
 const postRoutes = require("./routes/post");
 const uploadRoutes = require("./routes/upload");
+const isProd = process.env.NODE_ENV === "production";
 
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://company-website-taupe-seven.vercel.app",
-    ],
+    origin: isProd
+      ? "https://company-website-taupe-seven.vercel.app"
+      : "http://localhost:5173",
     credentials: true,
   })
 );
