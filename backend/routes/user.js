@@ -59,12 +59,12 @@ router.post("/login", async (req, res) => {
       res.status(401).json({ message: "deactivated user. ask administrator" });
     }
 
-    if (user.isLoggedIn) {
-      res.status(401).json({
-        message: "logged in already",
-        remainingAttempts: 5 - user.failedLoginAttempts,
-      });
-    }
+    // if (user.isLoggedIn) {
+    //   res.status(401).json({
+    //     message: "logged in already",
+    //     remainingAttempts: 5 - user.failedLoginAttempts,
+    //   });
+    // }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
@@ -87,7 +87,7 @@ router.post("/login", async (req, res) => {
 
     user.failedLoginAttempts = 0;
     user.lastLoginAttempt = new Date();
-    user.isLoggedIn = true;
+    // user.isLoggedIn = true;
 
     try {
       const response = await axios.get("https://api.ipify.org?format=json");
@@ -112,12 +112,6 @@ router.post("/login", async (req, res) => {
     );
     const isProd = process.env.NODE_ENV === "production";
 
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   secure: false,
-    //   sameSite: "strict",
-    //   maxAge: 24 * 60 * 60 * 1000,
-    // });
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProd,
@@ -153,7 +147,7 @@ router.post("/logout", async (req, res) => {
       const user = await User.findById(decoded.userId);
 
       if (user) {
-        user.isLoggedIn = false;
+        // user.isLoggedIn = false;
         await user.save();
       }
     } catch (error) {
