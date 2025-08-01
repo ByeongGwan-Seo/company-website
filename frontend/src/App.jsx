@@ -158,7 +158,7 @@ const router = createBrowserRouter([
             element: <AdminCreatePost />,
           },
           {
-            path: "edit-post:/id",
+            path: "edit-post/:id",
             element: <AdminEditPost />,
           },
           {

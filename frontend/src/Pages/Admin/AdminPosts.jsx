@@ -196,7 +196,12 @@ const AdminPosts = () => {
                   </td>
                   <td className="text-center text-md px-4 py-3 min-w-[12%]">
                     <div className="flex justify-center space-x-2">
-                      <button className="px-3 py-1.5 bg-blue-500 text-white whitespace-nowrap rounded hover:bg-blue-600">
+                      <button
+                        className="px-3 py-1.5 bg-blue-500 text-white whitespace-nowrap rounded hover:bg-blue-600"
+                        onClick={() =>
+                          (window.location.href = `/admin/edit-post/${post._id}`)
+                        }
+                      >
                         修正
                       </button>
                       <button className="px-3 py-1.5 bg-red-500 text-white whitespace-nowrap rounded hover:bg-red-600">
@@ -228,13 +233,13 @@ const AdminPosts = () => {
                 </span>
                 <div className="flex gap-2">
                   <a
-                    // href={`/admin/edit-post/${post._id}`}
+                    href={`/admin/edit-post/${post._id}`}
                     className="text-sm 2xl:text-base text-blue-600 hover:text-blue-800"
                   >
                     修正
                   </a>
                   <button
-                    // onClick={() => handleDelete(post._id)}
+                    onClick={() => handleDelete(post._id)}
                     className="text-sm 2xl:text-base text-red-600 hover:text-red-800"
                   >
                     削除
