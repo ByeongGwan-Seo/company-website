@@ -10,6 +10,7 @@ const Contact = () => {
     status: "in_progress",
   });
   const [error, setError] = useState("");
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
 
   const handleChange = (e) => {
     setFormData({
@@ -23,10 +24,7 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/contact",
-        formData
-      );
+      const response = await axios.post(`${baseURL}/api/contact`, formData);
 
       if (response.status === 201) {
         alert(

@@ -22,6 +22,8 @@ import AdminEditPost from "./Pages/Admin/AdminEditPost";
 import AdminContacts from "./Pages/Admin/AdminContacts";
 import AdminNavBar from "./Components/AdminNavBar/AdminNavBar";
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
 function AuthRedirectRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
@@ -29,7 +31,7 @@ function AuthRedirectRoute() {
     const verifyToken = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:3000/api/auth/verify-token",
+          `${baseURL}/api/auth/verify-token`,
           {},
           {
             withCredentials: true,
@@ -59,7 +61,7 @@ function ProtectedRoute() {
     const verifyToken = async () => {
       try {
         const response = await axios.post(
-          "http://localhost:3000/api/auth/verify-token",
+          `${baseURL}/api/auth/verify-token`,
           {},
           {
             withCredentials: true,
