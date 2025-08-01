@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT;
 
 const userRoutes = require("./routes/user");
 const contactRoutes = require("./routes/contact");
@@ -17,7 +17,10 @@ app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://company-website-taupe-seven.vercel.app",
+    ],
     credentials: true,
   })
 );
