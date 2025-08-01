@@ -2,10 +2,11 @@ import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import striptags from "striptags";
 import { decode } from "he";
+import Swal from "sweetalert2";
 
 const AdminPosts = () => {
   const [posts, setPosts] = useState([]);
-  const [pageSize, setPageSize] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("title");
@@ -43,6 +44,32 @@ const AdminPosts = () => {
     const start = (currentPage - 1) * pageSize;
     return filteredPosts.slice(start, start + pageSize);
   }, [filteredPosts, currentPage, pageSize]);
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "削除しますか？",
+      text: "削除した投稿は元に戻せません。",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "削除",
+      cancelButtonText: "キャンセル",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`${baseURL}/api/post/${id}`, {
+          withCredentials: true,
+        });
+        setPosts(posts.filter((post) => post._id !== id));
+        Swal.fire("削除完了", "削除しました", "success");
+      } catch (error) {
+        console.error("削除エラー:", error);
+        Swal.fire("エラー", "削除中エラー", "error");
+      }
+    }
+  };
 
   return (
     <div className="p-4 mx-auto max-w-[1800px]">
@@ -206,7 +233,10 @@ const AdminPosts = () => {
                       >
                         修正
                       </button>
-                      <button className="px-3 py-1.5 bg-red-500 text-white whitespace-nowrap rounded hover:bg-red-600">
+                      <button
+                        className="px-3 py-1.5 bg-red-500 text-white whitespace-nowrap rounded hover:bg-red-600"
+                        onClick={() => handleDelete(post._id)}
+                      >
                         削除
                       </button>
                     </div>
@@ -254,7 +284,7 @@ const AdminPosts = () => {
               </h3>
 
               <p className="text-gray-600 2xl:text-lg mb-3 overflow-hidden overflow-ellipsis whitespace-nowrap">
-                {post.content}
+                {decode(striptags(post.content))}
               </p>
 
               <div className="flex justify-between items-center text-sm 2xl:text-base text-gray-500 mb-2">
