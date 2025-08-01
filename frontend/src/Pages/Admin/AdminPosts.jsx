@@ -1,5 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
+import striptags from "striptags";
+import { decode } from "he";
 
 const AdminPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -131,7 +133,7 @@ const AdminPosts = () => {
                     {post.title}
                   </td>
                   <td className="text-left text-md px-4 py-3 max-w-[20%] overflow-hidden overflow-ellipsis whitespace-nowrap">
-                    {post.content}
+                    {decode(striptags(post.content))}
                   </td>
                   <td className="text-center text-md px-4 py-3">
                     {post.views}
