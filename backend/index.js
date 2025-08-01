@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 const userRoutes = require("./routes/user");
 const contactRoutes = require("./routes/contact");
@@ -33,10 +33,11 @@ app.use("/api/upload", uploadRoutes);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("MongoDB connected");
+    console.log("🟢 MongoDB connected");
+    app.listen(PORT, () => {
+      console.log(`🟢 server is running on port ${PORT}`);
+    });
   })
-  .catch((err) => console.log("MongoDB connection error:", err));
-
-app.listen(PORT, () => {
-  console.log("server is running");
-});
+  .catch((err) => {
+    console.log("🔴 MongoDB connection error:", err);
+  });
