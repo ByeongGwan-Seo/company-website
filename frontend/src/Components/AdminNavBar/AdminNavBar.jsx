@@ -7,11 +7,11 @@ const AdminNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const Navigate = useNavigate();
-
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   const handleLogout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/logout",
+        `${baseURL}/api/auth/logout`,
         {},
         { withCredentials: true }
       );

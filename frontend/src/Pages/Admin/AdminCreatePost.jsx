@@ -15,6 +15,7 @@ const AdminCreatePost = () => {
   const [uploadProgress, setUploadProgress] = useState({});
   const [currentUpload, setCurrentUpload] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
 
   const UploadModal = ({ progress, fileName }) =>
     showUploadModal && (
@@ -54,7 +55,7 @@ const AdminCreatePost = () => {
           fileFormData.append("originalName", encodedFileName);
 
           const response = await axios.post(
-            "http://localhost:3000/api/upload/file",
+            `${baseURL}/api/upload/file`,
             fileFormData,
             {
               withCredentials: true,
@@ -82,7 +83,7 @@ const AdminCreatePost = () => {
         fileUrl: uploadedFiles,
       };
 
-      await axios.post("http://localhost:3000/api/post", postData, {
+      await axios.post(`${baseURL}/api/post`, postData, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
@@ -210,7 +211,7 @@ const AdminCreatePost = () => {
                     formData.append("image", blobInfo.blob());
 
                     const response = await axios.post(
-                      "http://localhost:3000/api/upload/image",
+                      `${baseURL}/api/upload/image`,
                       formData,
                       {
                         withCredentials: true,

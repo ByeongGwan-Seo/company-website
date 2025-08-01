@@ -7,11 +7,11 @@ const AdminPosts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("title");
-
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/post", {
+        const response = await axios.get(`${baseURL}/api/post`, {
           withCredentials: true,
         });
 

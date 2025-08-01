@@ -17,13 +17,11 @@ const AdminEditPost = () => {
   const [uploadProgress, setUploadProgress] = useState({});
   const [currentUpload, setCurrentUpload] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
-
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/post/${id}`
-        );
+        const response = await axios.get(`${baseURL}/api/post/${id}`);
 
         setFormData({
           title: response.data.title,
@@ -82,7 +80,7 @@ const AdminEditPost = () => {
           fileFormData.append("originalName", encodedFileName);
 
           const response = await axios.post(
-            "http://localhost:3000/api/upload/file",
+            `${baseURL}/api/upload/file`,
             fileFormData,
             {
               withCredentials: true,
@@ -111,7 +109,7 @@ const AdminEditPost = () => {
         currentImages: currentImages,
       };
 
-      await axios.put(`http://localhost:3000/api/post/${id}`, postData, {
+      await axios.put(`${baseURL}/api/post/${id}`, postData, {
         withCredentials: true,
         headers: {
           "Content-Type": "application/json",
@@ -243,7 +241,7 @@ const AdminEditPost = () => {
                     formData.append("image", blobInfo.blob());
 
                     const response = await axios.post(
-                      "http://localhost:3000/api/upload/image",
+                      `${baseURL}/api/upload/image`,
                       formData,
                       {
                         withCredentials: true,

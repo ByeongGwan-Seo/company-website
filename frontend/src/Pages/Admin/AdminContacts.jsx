@@ -11,11 +11,11 @@ const AdminContacts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("name");
   const [statusFilter, setStatusFilter] = useState("all");
-
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/contact", {
+        const response = await axios.get(`${baseURL}/api/contact`, {
           withCredentials: true,
         });
 
@@ -36,7 +36,7 @@ const AdminContacts = () => {
   const handleStatusUpdate = async (newStatus) => {
     try {
       await axios.put(
-        `http://localhost:3000/api/contact/${selectedContact._id}`,
+        `${baseURL}/api/contact/${selectedContact._id}`,
         { status: newStatus },
         { withCredentials: true }
       );
@@ -71,7 +71,7 @@ const AdminContacts = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/api/contact/${id}`, {
+        await axios.delete(`${baseURL}/api/contact/${id}`, {
           withCredentials: true,
         });
 
