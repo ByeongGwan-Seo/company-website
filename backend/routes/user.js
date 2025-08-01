@@ -116,6 +116,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "None" : "Lax",
+      domain: isProd ? "company-website-taupe-seven.vercel.app" : undefined,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -158,6 +159,7 @@ router.post("/logout", async (req, res) => {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "None" : "Lax",
+      domain: isProd ? "company-website-taupe-seven.vercel.app" : undefined,
     });
 
     res.json({ message: "ログアウトしました" });

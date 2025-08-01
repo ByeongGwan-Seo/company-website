@@ -12,15 +12,23 @@ const contactRoutes = require("./routes/contact");
 const postRoutes = require("./routes/post");
 const uploadRoutes = require("./routes/upload");
 const isProd = process.env.NODE_ENV === "production";
+const allowedOrigins = [
+  "https://company-website-taupe-seven.vercel.app",
+  "http://localhost:5173",
+];
 
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: isProd
-      ? "https://company-website-taupe-seven.vercel.app"
-      : "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
