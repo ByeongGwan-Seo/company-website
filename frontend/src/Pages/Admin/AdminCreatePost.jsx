@@ -92,7 +92,7 @@ const AdminCreatePost = () => {
       setShowUploadModal(false);
       navigate("/admin/posts");
     } catch (error) {
-      console.log("error:", error);
+      console.error("Error creating post:", error);
       setShowUploadModal(false);
     }
   };
@@ -101,7 +101,7 @@ const AdminCreatePost = () => {
     const newFiles = Array.from(e.target.files);
 
     const newFileList = newFiles.map((file) => ({
-      id: Date.now() + Math.random,
+      id: Date.now() + Math.random(),
       name: file.name,
       size: file.size,
       file: file,
@@ -117,7 +117,9 @@ const AdminCreatePost = () => {
   const handleFileDelete = (fileId) => {
     setFormData((prev) => ({
       ...prev,
-      file: prev.files.filter((_, index) => prev.fileList[index].id !== fileId),
+      files: prev.files.filter(
+        (_, index) => prev.fileList[index].id !== fileId
+      ),
       fileList: prev.fileList.filter((file) => file.id !== fileId),
     }));
   };
@@ -125,9 +127,9 @@ const AdminCreatePost = () => {
   const formatFileSize = (bytes) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const size = ["Bytes", "KB", "MB", "GB"];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat(bytes / Math.pow(k, i).toFixed(2) + " " + size[i]);
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
