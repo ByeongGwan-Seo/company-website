@@ -1,8 +1,7 @@
-import React from "react";
-import { useState } from "react";
-import { useRef } from "react";
+import React, { useRef, useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AdminPostEditor from "../../Components/AdminPost/AdminPostEditor";
+import { Editor } from "@tinymce/tinymce-react";
 
 const AdminCreatePost = () => {
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ const AdminCreatePost = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            アップロード中。。。
+            ファイルアップロード中。。。
           </h3>
           <p className="text-sm text-gray-600 mb-4">{fileName}</p>
           <div className="relative pt-1">
@@ -42,16 +41,103 @@ const AdminCreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const editorContent = editorRef.current.getC;
+    const editorContent = editorRef.current.getContent();
+    setShowUploadModal(true);
+
+    try {
+      const uploadedFiles = await Promise.all(
+        formData.files.map(async (file) => {
+          setCurrentUpload(file.name);
+          const fileFormData = new FormData();
+          const encodedFileName = encodeURIComponent(file.name);
+          fileFormData.append("file", file);
+          fileFormData.append("originalName", encodedFileName);
+
+          const response = await axios.post(
+            "http://localhost:3000/api/upload/file",
+            fileFormData,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+              onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total
+                );
+                setUploadProgress((prev) => ({
+                  ...prev,
+                  [file.name]: percentCompleted,
+                }));
+              },
+            }
+          );
+          return response.data.fileUrl;
+        })
+      );
+
+      const postData = {
+        title: formData.title,
+        content: editorContent,
+        fileUrl: uploadedFiles,
+      };
+
+      await axios.post("http://localhost:3000/api/post", postData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      setShowUploadModal(false);
+      navigate("/admin/posts");
+    } catch (error) {
+      console.log("error:", error);
+      setShowUploadModal(false);
+    }
   };
+
+  const handleFileChange = (e) => {
+    const newFiles = Array.from(e.target.files);
+
+    const newFileList = newFiles.map((file) => ({
+      id: Date.now() + Math.random,
+      name: file.name,
+      size: file.size,
+      file: file,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      files: [...prev.files, ...newFiles],
+      fileList: [...prev.fileList, ...newFileList],
+    }));
+  };
+
+  const handleFileDelete = (fileId) => {
+    setFormData((prev) => ({
+      ...prev,
+      file: prev.files.filter((_, index) => prev.fileList[index].id !== fileId),
+      fileList: prev.fileList.filter((file) => file.id !== fileId),
+    }));
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const size = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat(bytes / Math.pow(k, i).toFixed(2) + " " + size[i]);
+  };
+
   return (
-    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8">
-        <h2 className="text-2xl sm:text-3xl font-bold sm:mb-8 text-gray-800">
-          新しい投稿
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8 text-gray-800">
+          新しい投稿作成
         </h2>
 
-        <form className="space-y-4 sm:space-y-8">
+        <form className="space-y-4 sm:space-y-8" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="title"
@@ -70,6 +156,7 @@ const AdminCreatePost = () => {
               required
             />
           </div>
+
           <div>
             <label
               htmlFor="content"
@@ -77,14 +164,90 @@ const AdminCreatePost = () => {
             >
               内容
             </label>
-            <AdminPostEditor
-              initialContent={formData.content}
-              onChange={(html) =>
-                setFormData({
-                  ...formData,
-                  content: html,
-                })
-              }
+            <Editor
+              apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+              onInit={(evt, editor) => (editorRef.current = editor)}
+              initialValue={formData.content}
+              init={{
+                height: 500,
+                menubar: true,
+                toolbar_mode: "scrolling",
+                toolbar_sticky: true,
+                toolbar_location: "top",
+                plugins: [
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "preview",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "media",
+                  "table",
+                  "code",
+                  "help",
+                  "wordcount",
+                  "image",
+                ],
+                toolbar:
+                  "undo redo | blocks | " +
+                  "bold italic | alignleft aligncenter " +
+                  "alignright | bullist numlist | " +
+                  "image | help",
+                content_style:
+                  "body { font-family:Helvetica,Arial,sans-serif; font-size:14px } @media (max-width: 768px) { body { font-size: 16px; } }",
+                images_upload_handler: async (blobInfo, progress) => {
+                  try {
+                    const formData = new FormData();
+                    formData.append("image", blobInfo.blob());
+
+                    const response = await axios.post(
+                      "http://localhost:3000/api/upload/image",
+                      formData,
+                      {
+                        withCredentials: true,
+                        headers: {
+                          "Content-Type": "multipart/form-data",
+                        },
+                      }
+                    );
+
+                    return response.data.imageUrl;
+                  } catch (error) {
+                    console.error("Image upload failed:", error);
+                    throw error;
+                  }
+                },
+                file_picker_types: "image",
+                automatic_uploads: true,
+                file_picker_callback: function (cb, value, meta) {
+                  const input = document.createElement("input");
+                  input.setAttribute("type", "file");
+                  input.setAttribute("accept", "image/*");
+
+                  input.onchange = function () {
+                    const file = this.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                      const id = "blobid" + new Date().getTime();
+                      const blobCache =
+                        editorRef.current.editorUpload.blobCache;
+                      const base64 = reader.result.split(",")[1];
+                      const blobInfo = blobCache.create(id, file, base64);
+                      blobCache.add(blobInfo);
+                      cb(blobInfo.blobUri(), { title: file.name });
+                    };
+                    reader.readAsDataURL(file);
+                  };
+                  input.click();
+                },
+              }}
             />
           </div>
 
@@ -99,12 +262,13 @@ const AdminCreatePost = () => {
               type="file"
               id="files"
               multiple
+              onChange={handleFileChange}
               className="mt-1 block w-full text-base sm:text-lg text-gray-500 file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-4 sm:file:px-6 file:rounded-lg file:border file:text-base sm:file:text-lg file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
             />
 
             {formData.fileList.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p className="font-medium text-gray-700">ファイルリスト:</p>
+                <p className="font-medium text-gray-700">添付ファイルリスト:</p>
                 <ul className="bg-gray-50 rounded-lg divide-y divide-gray-200">
                   {formData.fileList.map((file) => (
                     <li
@@ -170,7 +334,7 @@ const AdminCreatePost = () => {
             <button
               type="button"
               onClick={() => navigate("/admin/posts")}
-              className="w-full sm:w-auto sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-medium text-white bg-gray-600 border-2 border-transparent rounded-lg shadow-sm hover:bg-gray-700 focus:outline-none transition-all duration-300"
+              className="w-full sm:w-auto sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none transition-all duration-300"
             >
               キャンセル
             </button>
