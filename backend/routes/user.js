@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
+const isProd = process.env.NODE_ENV === "production";
 
 /**
  * @route POST /signup
@@ -110,7 +111,6 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
-    const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -156,8 +156,8 @@ router.post("/logout", async (req, res) => {
 
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,
-      sameSite: "strict",
+      secure: isProd,
+      sameSite: isProd ? "None" : "Lax",
     });
 
     res.json({ message: "ログアウトしました" });

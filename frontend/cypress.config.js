@@ -9,6 +9,7 @@ export default defineConfig({
     env: {
       ADMIN_ID: process.env.ADMIN_ID,
       ADMIN_PW: process.env.ADMIN_PW,
+      apiUrl: process.env.API_URL || "http://localhost:3000/api",
     },
   },
 });
