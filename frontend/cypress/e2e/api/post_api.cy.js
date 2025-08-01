@@ -1,6 +1,7 @@
 describe("Post API Tests", () => {
-  const baseUrl = "http://localhost:3000/api/post";
-  const loginUrl = "http://localhost:3000/api/auth/login";
+  const apiUrl = Cypress.env("apiUrl");
+  const baseUrl = `${apiUrl}/post`;
+  const loginUrl = `${apiUrl}/auth/login`;
   let createdPostId = null;
   let tokenCookie = "";
 
