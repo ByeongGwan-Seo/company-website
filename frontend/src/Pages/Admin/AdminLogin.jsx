@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const AdminLogin = () => {
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -16,20 +17,14 @@ const AdminLogin = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-
-    console.log(formData);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        formData,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post(`${baseURL}/api/auth/login`, formData, {
+        withCredentials: true,
+      });
 
       if (response.data.user) {
         navigate("/admin/posts");
@@ -40,6 +35,7 @@ const AdminLogin = () => {
 
       console.log(errorMessage);
       console.log(remainingAttempts);
+
       setError({
         message: errorMessage,
         remainingAttempts: remainingAttempts,
