@@ -151,7 +151,7 @@ router.post("/logout", async (req, res) => {
         await user.save();
       }
     } catch (error) {
-      console.log("토큰 검증 오류: ", error.message);
+      console.log("トークン検証エラー: ", error.message);
     }
 
     res.clearCookie("token", {
@@ -160,10 +160,10 @@ router.post("/logout", async (req, res) => {
       sameSite: "strict",
     });
 
-    res.json({ message: "로그아웃되었습니다." });
+    res.json({ message: "ログアウトしました" });
   } catch (error) {
-    console.log("로그아웃 오류: ", error.message);
-    res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    console.log("ログアウトエラー: ", error.message);
+    res.status(500).json({ message: "サーバーエラー" });
   }
 });
 
